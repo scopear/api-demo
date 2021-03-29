@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM ruby:3.0.0-alpine3.13
 
 # Install dependencies:
 # - build-base: To ensure certain gems can be compiled
