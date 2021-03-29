@@ -1,0 +1,25 @@
+
+<h1>About</h1>
+
+<hr />
+<p>This Scope AR API-Demo-Ruby is a simple Ruby-On-Rails client application that demonstrates a complete, end-to-end integration with Scope AR APIs.</p>
+
+<p>It:</p>
+
+<ol>
+  <li>Generates a unique deeplink that can be clicked to open the Worklink app on a mobile device and start a ScenarioSession.</li>
+  <li>Simulates API requests typically made by the Worklink app to create ScenarioSessions (provided as an alternative to installing the Worklink app).</li>
+  <li>Listens for webhook notifications pertaining to the creation/update of ScenarioSessions on Scope API servers.</li>
+  <li>Queries Scope GraphQL APIs for information about the ScenarioSessions identified in webhooks received.</li>
+  <li>Saves and displays all information received from both the API and GraphQL.</li>
+</ol>
+
+<p><a href="https://github.com/scopear/api-demo-ruby">View the source code for this application here.</a></p>
+<p class="note"><strong>Note</strong>: Webhooks are received by this application at: <%=receive_webhooks_url%></p>
+
+<br />
+<%=form_tag demo_path, method: :get do -%>
+  <%= submit_tag 'Go To The Demo', class: "btn btn-primary" %>
+<% end -%>
+
+

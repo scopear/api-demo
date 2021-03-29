@@ -1,0 +1,74 @@
+<style type="text/css">
+  table.webhook {
+    height: auto;
+    border-bottom: 0px solid;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+  }
+  table.webhook th{
+    min-width: 200px;
+    vertical-align: top;
+    padding-right: 10px;
+  }
+  pre {
+    height: 130px;
+    overflow: auto;
+  }
+
+</style>
+<% if notice -%><p id="notice"><%= notice %></p><% end %>
+
+<h1><%=@limit%> Most Recent Webhooks</h1>
+
+<p>Last Updated: <%=Time.zone.now.to_formatted_s(:rfc822)%> (updates in <span id="event-log-seconds">60</span> seconds)</p>
+
+<hr />
+<%=form_tag demo_path, method: :get do -%>
+  <%= submit_tag 'Reload Now', class: "btn btn-info" %>
+<% end -%>
+<br />
+
+<% @webhooks.each do |webhook| %>
+<table class="webhook">
+  <tbody>
+      <tr>
+        <th>Webhook ID</th>
+        <td><%= webhook.id %></td>
+      </tr>
+      <tr>
+        <th>Webhook Timestamp</th>
+        <td><%= webhook.created_at %></td>
+      </tr>
+      <tr>
+        <th>Webhook Origin</th>
+        <td><%= webhook.origin %></td>
+      </tr>
+      <tr>
+        <th>Webhook Payload</th>
+        <td><pre><%= JSON.pretty_generate(webhook.payload) %></pre></td>
+      </tr>
+      <tr>
+        <th>GraphQL Timestamp</th>
+        <td><%= webhook.gql_fetched_at.presence || 'Not yet fetched; wait for GetResourceInfoJob to execute.' %></td>
+      </tr>
+<% if webhook.gql_fetched_at -%>
+      <tr>
+        <th>GraphQL Request</th>
+        <td><pre>
+### Query
+<%= GetResourceInfoJob::GQL_QUERY %>
+
+### Variables
+<%= JSON.pretty_generate(GetResourceInfoJob.variables_for(webhook)) %>
+        </pre></td>
+      </tr>
+      <tr>
+        <th>GraphQL Response</th>
+        <td><pre><%= JSON.pretty_generate(webhook.api_response)%></pre></td>
+      </tr>
+<% end %>
+  </tbody>
+</table>
+<hr />
+<% end %>
+

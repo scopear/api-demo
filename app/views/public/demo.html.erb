@@ -1,0 +1,184 @@
+<script>
+  function afterConfigurationFormChange() {
+    // submit the form without navigating away
+    $.ajax({
+           type: "POST",
+           url: $("#save_configuration_form").attr("action"),
+           type: $("#save_configuration_form").attr("method"),
+           data: $("#save_configuration_form").serialize()
+         });
+
+    updateDeeplink();
+
+    return false; // avoid to execute the actual submit of the form.
+  };
+
+  function updateDeeplink() {
+    let deepLinkEl = $("#deepLink");
+    let deepLinkUrl = "worklink://resource?action=fetch_catalog&asset=" + $("#asset_id").val()
+
+    try {
+      deepLinkUrl += "&" + $.param(JSON.parse($("#external_data").val()));
+    } catch (err) {
+      alert("External Data must be valid JSON.");
+    }
+
+    deepLinkEl.attr("href", deepLinkUrl);
+    deepLinkEl.text(deepLinkUrl);
+  };
+
+  let refreshDelay;
+  let refreshTimer;
+  let coutdownTimer;
+  function updateEventLog() {
+    if(coutdownTimer) { clearInterval(coutdownTimer); }
+    if(refreshTimer) { clearInterval(refreshTimer); }
+    $( "#event-log" ).load( "<%=recent_webhooks_path%>", function (response, status, xhr) {
+      if (status == "error") {
+        var msg = "<h1>Unable to load event log ";
+        $( "#event-log" ).html( msg + xhr.status + " " + xhr.statusText + "</h1>" );
+      } else {
+        refreshTimer = setInterval(updateEventLog,60000);
+        coutdownTimer = setInterval(updateEventLogTimer,1000);
+      }
+    });
+    refreshDelay = 60;
+  };
+
+  function refreshEventLog() {
+    clearInterval(refreshTimer);
+  }
+
+  function updateEventLogTimer() {
+    refreshDelay = refreshDelay -1;
+    if(refreshDelay >= 0) {
+      $("#event-log-seconds").html(refreshDelay);
+    }
+  };
+
+  $(document).ready(function(){
+    $("form :input").each(function(){
+      $(this).change(afterConfigurationFormChange);
+    });
+    updateDeeplink();
+    updateEventLog();
+  });
+</script>
+<style type="text/css">
+  form input {
+    width: 100%;
+  }
+  #left-panel {
+    border-right: 1px solid;
+    padding-right: 25px;
+  }
+  #event-log {
+    padding-left: 25px;
+  }
+  table#demo-grid {
+    height: 100%;
+    width: 100%;
+  }
+  table#demo-grid tr {
+    height: 100%;
+    width: 100%;
+  }
+  table#demo-grid td {
+    height: 100%;
+    width: 50%;
+    overflow: auto;
+    vertical-align: top;
+  }
+
+  .demo-container {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+  }
+  h6 {
+    font-size: -1em;
+    font-weight: bold;
+  }
+  .half {
+    width: 50%;
+  }
+  LI {
+    font-weight: normal;
+  }
+  UL {
+    padding-inline-start: 20px;
+  }
+</style>
+
+<table id="demo-grid">
+  <tr>
+    <td id="left-panel">
+      <div>
+        <h1>Demo Instructions</h1>
+
+        <p><%= link_to "Home", root_path %></p>
+
+        <hr />
+        <p><h4>Step 1</h4><strong>Configure this application.</strong></p>
+
+        <%=form_tag save_configuration_path, id: :save_configuration_form, method: :post do -%>
+          <div class="mb-3">
+            <%=label_tag :asset_id, "Asset ID" %>
+            <%=text_field_tag :asset_id, @asset_id, id: :asset_id, class: "form-control", "aria-describedby": "assetIdHelp" %>
+            <div id="assetIdHelp" class="form-text">Can be any string, provided that the server has an a Scenario Catalog record with matching Asset ID.</div>
+            <br />
+            <%=label_tag :ar_content_id, "AR Content ID" %>
+            <%=text_field_tag :ar_content_id, @ar_content_id, id: :ar_content_id, class: "form-control", "aria-describedby": "arContentIdHelp" %>
+            <div id="arContentIdHelp" class="form-text">Can be any integer, provided that the server has an AR Content record with matching ID.</div>
+            <br />
+            <%=label_tag :external_data, "External Data" %>
+            <%=text_area_tag :external_data, @external_data, id: :external_data, class: "form-control", "aria-describedby": "externalDataHelp" %>
+            <div id="externalDataHelp" class="form-text">Can be any properly formed JSON. The value that you specify will be passed to the server in Step 2 and then returned in Step 4 as the value of the "externalData" field in the GraphQL Response. </div>
+          </div>
+        <% end -%>
+
+        <p class="note"><strong>Note</strong>: This "External Data" mechanism can be used to build complex integrations. For example, you can pass the ID (or IDs) of things external to the Scope ecosystem (such as a Salesforce opportunity), and then later select on the value of the externalData attribute to link the ScenarioSession data received with the original Salesforce opportunity (using the Salesforce API or other 3rd party tool).  See <a href="https://docs.google.com/presentation/d/1K1L6o8MtLfIyPaBKtDyZHXrfinODO8Md8sidYqRxsXM/edit#slide=id.g8379a0ad13_0_165">this link</a> for more information about complex integrations.</p>
+
+        <%=form_tag reset_configuration_path, method: :post do -%>
+          <%= submit_tag 'Reset Defaults', class: "btn btn-secondary" %>
+        <% end -%>
+
+        <br />
+        <p><h4>Step 2</h4><strong>Create a ScenarioSession.</strong></p>
+
+        <h6>Option A</h6>
+        <p>Click the dynamically configured deep link below to launch the Worklink app and begin a ScenarioSession.</p>
+        <p><a id="deepLink" target="_blank" href="http://">http://</a></p>
+        <p class="note"><strong>Note</strong>: This link needs to be opened on a mobile device. If you are not viewing this application on a mobile device, send yourself an email with the link (copy & paste), and then open the link on your mobile device.</p>
+
+        <h6>Option B</h6>
+        <p>Click the following button to send the server an HTTP Post that simulates the Worklink app creating a ScenarioSession.</p>
+
+        <%=form_tag scenario_sessions_path, method: :post do -%>
+          <%= submit_tag 'Simulate Create', class: "btn btn-primary" %>
+        <% end -%>
+        <br />
+
+        <p class="note"><strong>Note</strong>: You would never need to implement something like this button in a real application.</p>
+
+        <br />
+        <p><h4>Step 3</h4><strong>Watch the right side of this page to observe webhooks received by this application as you interact with Worklink.<strong></p>
+
+        <br />
+        <hr />
+        <br />
+        <p><h2>Learn More</h2></p>
+
+        <ul>
+          <li>Interact with the Worklink App to cause additional webhooks to fire.</li>
+          <li>Change the configuration above and/or create more sessions.</li>
+          <li>Read the source code (<a href="https://github.com/scopear/api-demo-ruby">linked here</a>).</li>
+        </ul>
+      </div>
+    </td>
+    <td>
+      <div id="event-log" class="demo-container"></div>
+    </td>
+  </tr>
+</table>
+
