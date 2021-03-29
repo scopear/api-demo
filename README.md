@@ -1,11 +1,4 @@
-# README
-
-* TODOS
-
-  1. Add 2nd simulate with view step event
-  2. Deploy to Heroku
-
-* About
+# About
 
   This Scope AR API-Demo-Ruby is a simple Ruby-On-Rails client application that demonstrates a complete, end-to-end integration with Scope AR APIs.
 
@@ -17,13 +10,13 @@
   * Queries Scope GraphQL APIs for information about the ScenarioSessions identified in webhooks received.
   * Saves and displays all information received from both the API and GraphQL.
 
-* Important Files
+# Important Files
 
   * app/controllers/webhooks_controller.rb
   * app/jobs/get_resource_info_job.rb
   * config/credentials.yml.enc
 
-* System dependencies
+# System dependencies
 
   Required:
   * Ruby (SEE: `/.ruby-version`)
@@ -33,7 +26,7 @@
     * Scope Worklink Application installed on a mobile device
     * Static IP (or fixed Host) (See "Setup" Section)
 
-* Setup
+# Setup
 
   Local API Server (i.e. Development Mode):
 
@@ -51,7 +44,7 @@
     4. run `rails s`
     5. open a browser to http://your.custom.ip.or.domain
 
-* Client Configuration
+# Client Configuration
 
   Run `rails credentials:edit` to configure this application.
 
@@ -64,7 +57,7 @@
   **Note #1: `config/master.key` is atypically checked into source control so that you can easily decrypt and edit the credentials file.**
   **Note #2: the local development option requires additional steps to be performed on the API server (see "Server Configuration").**
 
-* Server Configuration
+# Server Configuration
 
   Local API Server:
 
@@ -96,7 +89,7 @@
     * `api_url` should use the url of the API server
     * `gql_url` should use the url of the GraphQL server
 
-* Services (job queues, cache servers, search engines, etc.)
+# Services (job queues, cache servers, search engines, etc.)
 
   Development Mode:
   * none
@@ -105,5 +98,5 @@
   * mysql
   * sidekiq
 
-* Deployment instructions
+# Deployment instructions
 
