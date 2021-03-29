@@ -21,5 +21,11 @@ test:
   database: db/test.sqlite3
 
 production:
-  <<: *default
-  database: db/production.sqlite3
+  adapter: mysql2
+  host:     <%= ENV.fetch('MYSQL_HOST', nil) %>
+  port:     <%= ENV.fetch('MYSQL_PORT', nil) %>
+  database: <%= ENV.fetch('MYSQL_DATABASE', nil) %>
+  username: <%= ENV.fetch('MYSQL_USER', nil) %>
+  password: <%= ENV.fetch('MYSQL_PASSWORD', nil) %>
+  pool: 1
+  timeout: 5000
