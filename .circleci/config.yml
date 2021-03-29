@@ -1,0 +1,64 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: scopear/docker-base:ci-alpine3.12
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+    steps:
+      - setup_remote_docker:
+          version: 19.03.13
+      - checkout
+      - run:
+          name: Docker Login
+          command: docker_login
+      - run:
+          name: Build Images
+          command: docker build -t "scopear/docker-api-demo-ruby" .
+      - run:
+          name: Push Images
+          command: docker_push "scopear/docker-api-demo-ruby"
+
+  on-prem:
+    docker:
+      - image: scopear/docker-base:ci-aws-alpine3.12
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
+    steps:
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: Docker Login
+          command: docker_login
+      - run:
+          name: Upload Image
+          command: docker_upload_s3 "scopear/docker-api-demo-ruby" "$CIRCLE_TAG"
+
+
+workflows:
+  deploy:
+    jobs:
+      - build:
+          context: scope-circleci
+          filters:
+            branches:
+              ignore:
+                - /.*/
+            tags:
+              only:
+                - /^\d+\.\d+\.\d+.*/ # e.g. 1.23.4-rc5
+                - /^on-prem-\d+\.\d+\.\d+.*/ # e.g. on-prem-1.23.4-rc5
+                - /^\w+-\d+-QA.*/ # e.g. CMS-1234-QA-2
+      - on-prem:
+          requires:
+           - build
+          context: scope-circleci-on-prem
+          filters:
+            branches:
+              ignore:
+                - /.*/
+            tags:
+              only:
+                - /^on-prem-\d+\.\d+\.\d+.*$/
