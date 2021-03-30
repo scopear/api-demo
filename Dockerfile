@@ -30,9 +30,11 @@ ENV RAILS_ENV=$RAILS_ENV
 RUN gem install bundler
 
 # Finish establishing our Ruby enviornment depending on the RAILS_ENV
-RUN if [[ "$RAILS_ENV" == "production" ]]; then bundle install --without development test; rails assets:precompile; else bundle install; fi
+RUN if [[ "$RAILS_ENV" == "production" ]]; then bundle install --without development test; else bundle install; fi
 
 # Copy the main application.
 COPY . ./
+
+RUN rails assets:precompile
 
 CMD ["bundle", "exec", "rails", "s"]
