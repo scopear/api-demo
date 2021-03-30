@@ -5,7 +5,7 @@ FROM ruby:2.7.2-alpine3.13
 # - nodejs: Compile assets
 # - imagemagick: for image processing
 # - tzdata: Timezone support
-RUN apk add --no-cache build-base nodejs mysql-client imagemagick sqlite sqlite-dev tzdata bash
+RUN apk add --no-cache build-base nodejs mysql-client imagemagick sqlite sqlite-dev tzdata bash curl wget
 
 # Set an environment variable to store where the app is installed inside
 # of the Docker image.
@@ -22,8 +22,9 @@ WORKDIR $INSTALL_PATH
 COPY Gemfile Gemfile.lock ./
 
 # Set RAILS_ENV and RACK_ENV
-ARG RAILS_ENV
+ARG RAILS_ENV="production"
 ENV RACK_ENV=$RAILS_ENV
+ENV RAILS_ENV=$RAILS_ENV
 
 # Prevent bundler warnings; ensure that the bundler version executed is >= that which created Gemfile.lock
 RUN gem install bundler
