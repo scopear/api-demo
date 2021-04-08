@@ -100,3 +100,18 @@
 
 # Deployment instructions
 
+  * trigger a build by creating and pushing a tag to origin: `git tag -f 0.2.1; git push -f origin 0.2.1` <br>Note: increment the major or minor version of most recent tag listed here: https://github.com/scopear/api-demo-ruby/tags.
+  * restart the server (note: ask devops to put your ssh key on the server).
+
+  ```
+    ssh admin@api-demo-ruby.scopear.com
+    sudo su
+    cd /opt/scope/
+    nano demo.yml
+    # update image values in demo.yml with new tag (2x), e.g. change scopear/docker-api-demo-ruby:0.2.0 -> scopear/docker-api-demo-ruby:0.2.1
+    docker stack rm demo # run this multiple times until you receive the response "Nothing found in stack: demo"
+    docker stack deploy --compose-file demo.yml --prune --with-registry-auth demo
+  ```
+
+  <br>See [CMS deployment Jira documentation](https://scopearcloud.atlassian.net/wiki/spaces/CMS/pages/821264385/How+to+deploy+to+QA) for more information about troubleshooting.
+
