@@ -4,7 +4,7 @@ FROM ruby:2.7.2-alpine3.13
 # - build-base: To ensure certain gems can be compiled
 # - nodejs: Compile assets
 # - imagemagick: for image processing
-RUN apk add --no-cache build-base nodejs mysql-client imagemagick sqlite sqlite-dev
+RUN apk add --no-cache build-base nodejs mysql-client imagemagick sqlite sqlite-dev bash
 
 # Set an environment variable to store where the app is installed inside
 # of the Docker image.
