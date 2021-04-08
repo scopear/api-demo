@@ -1,0 +1,108 @@
+---
+version: '3.7'
+services:
+  api:
+    image: scopear/docker-api-demo-ruby:0.1.7
+    networks:
+    - database
+    env_file:
+    - mariadb.env
+    - demo.env
+    environment:
+    - RAILS_ENV=production
+    ports:
+    - 3000:3000
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 1
+        delay: 0s
+        failure_action: rollback
+        order: start-first
+      rollback_config:
+        parallelism: 0
+        delay: 0s
+        failure_action: pause
+        order: start-first
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: '5'
+    command: bash -c "bundle exec rails server -b 0.0.0.0 -p 3000"
+
+  sidekiq:
+    image: scopear/docker-api-demo-ruby:0.1.7
+    env_file:
+    - mariadb.env
+    - demo.env
+    environment:
+    - RAILS_ENV=production
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 0s
+        failure_action: rollback
+        order: start-first
+      rollback_config:
+        parallelism: 0
+        delay: 0s
+        failure_action: pause
+        order: start-first
+      replicas: 1
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: '5'
+    command: bash -c "bundle exec sidekiq -e production -q critical -q high -q default -q low"
+
+  redis:
+    image: "redis:alpine"
+
+  mariadb:
+    image: scopear/docker-db:on-prem-2.18.4
+    networks:
+    - database
+    secrets:
+    - mysql_root_password
+    - mysql_password
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 0s
+        failure_action: rollback
+        order: stop-first
+      rollback_config:
+        parallelism: 0
+        delay: 0s
+        failure_action: pause
+        order: stop-first
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: '5'
+    volumes:
+    - "/mnt/shared/db_data:/var/lib/mysql"
+    env_file:
+    - mariadb.env
+    environment:
+      SECRET_ENV_PREFIXES: SCOPEMYSQL SCOPECMSDB
+
+
+networks:
+  database:
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+      - subnet: 172.21.0.0/16
+
+secrets:
+  mysql_root_password:
+    file: "./secrets/mysql_root_password"
+  mysql_password:
+    file: "./secrets/mysql_password"
+

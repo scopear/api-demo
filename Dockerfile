@@ -4,7 +4,8 @@ FROM ruby:2.7.2-alpine3.13
 # - build-base: To ensure certain gems can be compiled
 # - nodejs: Compile assets
 # - imagemagick: for image processing
-RUN apk add --no-cache build-base nodejs mysql-client imagemagick sqlite sqlite-dev bash
+# - tzdata: Timezone support
+RUN apk add --no-cache build-base nodejs mysql-client imagemagick sqlite sqlite-dev tzdata bash curl wget mariadb-dev yarn
 
 # Set an environment variable to store where the app is installed inside
 # of the Docker image.
@@ -21,8 +22,9 @@ WORKDIR $INSTALL_PATH
 COPY Gemfile Gemfile.lock ./
 
 # Set RAILS_ENV and RACK_ENV
-ARG RAILS_ENV
+ARG RAILS_ENV="production"
 ENV RACK_ENV=$RAILS_ENV
+ENV RAILS_ENV=$RAILS_ENV
 
 # Prevent bundler warnings; ensure that the bundler version executed is >= that which created Gemfile.lock
 RUN gem install bundler
@@ -32,5 +34,7 @@ RUN if [[ "$RAILS_ENV" == "production" ]]; then bundle install --without develop
 
 # Copy the main application.
 COPY . ./
+
+RUN rails assets:precompile
 
 CMD ["bundle", "exec", "rails", "s"]
