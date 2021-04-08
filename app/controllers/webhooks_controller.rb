@@ -1,6 +1,6 @@
 class WebhooksController < ApplicationController
   before_action :set_webhook, only: %i[ show edit update destroy ]
-  skip_before_action :verify_authenticity_token, only: :receive
+  # skip_before_action :verify_authenticity_token, only: :receive
   # GET /webhooks/recent or /webhooks/recent.json
   def recent
     @limit = 10
