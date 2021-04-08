@@ -107,9 +107,8 @@
     ssh admin@api-demo-ruby.scopear.com
     sudo su
     cd /opt/scope/
-    nano demo.yml
-    # update image values in demo.yml with new tag (2x), e.g. change scopear/docker-api-demo-ruby:0.2.0 -> scopear/docker-api-demo-ruby:0.2.1
-    docker stack rm demo # run this multiple times until you receive the response "Nothing found in stack: demo"
+    nano demo.yml  #-> update image values in demo.yml with new tag 2x (e.g. change scopear/docker-api-demo-ruby:0.2.0 -> scopear/docker-api-demo-ruby:0.2.1)
+    docker stack rm demo  #-> run this multiple times until you receive the response "Nothing found in stack: demo"
     docker stack deploy --compose-file demo.yml --prune --with-registry-auth demo
   ```
 
