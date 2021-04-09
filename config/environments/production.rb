@@ -16,6 +16,7 @@ Rails.application.configure do
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
   config.action_controller.default_protect_from_forgery = false
+  config.action_controller.default_url_options = { host: 'api-demo-ruby.scopear.com' }
 
   # Ensures that a master key has been made available in either ENV["RAILS_MASTER_KEY"]
   # or in config/master.key. This key is used to decrypt credentials (and other encrypted files).
