@@ -14,7 +14,7 @@ class ScenarioSessionsController < ApplicationController
 
     ar_content_id = session[:ar_content_id] || PublicController::DEFAULT_AR_CONTENT_ID
     external_data = begin
-      JSON.parse(session[:external_data])
+      JSON.parse(session[:external_data].to_s)
     rescue JSON::ParserError
       PublicController::DEFAULT_EXTERNAL_DATA
     end
