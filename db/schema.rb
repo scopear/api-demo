@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_13_021630) do
+ActiveRecord::Schema.define(version: 2021_04_14_011849) do
 
   create_table "auth_tokens", force: :cascade do |t|
     t.string "username"
-    t.string "token"
+    t.text "token"
     t.datetime "expires_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
