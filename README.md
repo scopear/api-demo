@@ -12,9 +12,11 @@
 
 # Important Files
 
-  * app/controllers/webhooks_controller.rb
-  * app/jobs/get_resource_info_job.rb
-  * config/credentials.yml.enc
+  * [app/controllers/webhooks_controller.rb](/tree/develop/app/controllers/webhooks_controller.rb)
+  * [app/jobs/get_resource_info_job.rb](/tree/develop/app/jobs/get_resource_info_job.rb)
+  * [app/models/auth_token.rb](/tree/develop/app/models/auth_token.rb)
+  * [app/services/api_service.rb](/tree/develop/app/services/api_service.rb)
+  * [config/credentials.yml.enc](/tree/develop/config/credentials.yml.enc)
 
 # System dependencies
 
@@ -24,7 +26,7 @@
   Optional:
     * RVM (SEE: `/.ruby-gemset`)
     * Scope Worklink Application installed on a mobile device
-    * Static IP (or fixed Host) (See "Setup" Section)
+    * Static IP or Domain (See "Setup" Section)
 
 # Setup
 
@@ -32,17 +34,17 @@
 
     1. Clone this repo
     2. Configure client & server applications (SEE "Client Configuration" & "Server Configuration" Sections)
-    3. run `rails db:setup`
-    4. run `rails s -p 3031` (NOTE: any non-standard port suffices to prevent conflicts with local API server)
-    5. open a browser to http://localhost:3031
+    3. Run `rails db:setup`
+    4. Run `rails s -p 3031` (NOTE: any non-standard port suffices to prevent conflicts with local API server)
+    5. Open a browser to http://localhost:3031
 
   Remote API Server:
 
     1. Clone this repo
     2. Configure client & server applications (SEE "Client Configuration" & "Server Configuration" Sections)
-    3. run `rails db:setup`
-    4. run `rails s`
-    5. open a browser to http://your.custom.ip.or.domain
+    3. Run `rails db:setup`
+    4. Run `rails s`
+    5. Open a browser to http://your.custom.ip.or.domain
 
 # Client Configuration
 
@@ -64,30 +66,56 @@
     Run the following commands in the [`api` repo directory](https://github.com/scopear/api) (assuming you have already setup the server):
 
       1. `bundle exec rails c`
-      2. > `c = Company.first`
-      3. > `c.update!(webhook: 'http://docker.for.mac.localhost:3031/webhooks/receive')`
-      4. > `c.permalink`
-      5. > `c.ar_contents.first.id`
-      6. > `c.scenario_catalogs.first_or_create(external_asset_id: "42")` #note: "42" is an arbitrary value [from "The Hitchhiker's Guide To The Galaxy] that can be changed to any value you prefer.
-      7. > `c.api_key`
-      8. > `GQL::TWO_FACTOR_TOKEN`
+      2. > `c = Company.create permalink: 'api-demo-ruby', webhook: 'http://docker.for.mac.localhost:3031/webhooks/receive')`
+      3. > `a = User.create(username: 'api.demo.ruby.admin', password: '<INSERT>', scope_admin: true)
 
-    Then set the values in the credentials file in the [`api-demo-ruby` repo directory](https://github.com/scopear/api-demo-ruby):
+    Then sign in as the scope admin and perform the following steps via the CMS interface:
 
-    * `organization_permalink` should match the value of step #4 above
-    * `ar_content_id` should match the value of step #5 above
-    * `asset_id` should match the value of step #6 above
-    * `api_auth_token` should match the value of step #7 above
-    * `two_factor_token` should match the value of step #8 above
+      4. Enable reporting_admin feature flag for the organization
+      5. Create a scenario (you'll need to obtain and upload a valid ar_content ".scope" file)
+      6. Create a scenario catalog that contains the above scenario and an external asset id = 42 (can be any arbitrary value that you want)
+      7. Create a user for the organization with worklink_viewer license and reporting_admin feature
+
+    Then uncomment the local configuration section of the credentials file in the [`api-demo-ruby` repo directory](https://github.com/scopear/api-demo-ruby), and set the following values:
+
+    * `api_auth_password` should match the value used in step #3
+    * `ar_content_id` should match the id of the result in step #5 above (See "Retreiving the ARContentID" section below)
+    * `asset_id` should match the value used in step #6 above
 
   Remote API Server:
 
-    Perform the steps listed above (for local development), except as follows:
+    Perform the steps listed above for local development, except as noted below:
 
-    * `c = Company.first` should use something specific to your account
-    * `c.update!(webhook: 'http://docker.for.mac.localhost:3031/webhooks/receive')` should use the host & port bound to this client application (e.g. `http://your.custom.ip.or.domain/webhooks/receive`)
-    * `api_url` should use the url of the API server
-    * `gql_url` should use the url of the GraphQL server
+    * Create the company using the permalink value of your choice (and set organization_permalink value accordingly in the credentials file)
+    * Set the webhook value on the organization to the host & port bound to your client application (e.g. `http://your.custom.ip.or.domain/webhooks/receive`)
+    * Set api_url to the custom ip or domain of your API server in the credentials file
+
+    **NOTE: The internal steps used to create the sandbox account on scope production servers are [documented here](https://scopearcloud.atlassian.net/browse/CMS-3747).**
+
+## Retrieving the ARContentId
+
+  The id of the most recently created ArContent (otherwise known as ScenarioRelease in GraphQL Schema) can be obtained either by:
+
+    * Executing the following command in rails console `ArContent.last.id`
+    * or - Executing the following via GraphQL
+    ```
+    query {
+      viewer {
+        organization {
+          scenarios {
+            nodes {
+              releases {
+                nodes {
+                  id
+                  databaseId
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ```
 
 # Services (job queues, cache servers, search engines, etc.)
 
@@ -100,15 +128,15 @@
 
 # Deployment instructions
 
-  * trigger a build by creating and pushing a tag to origin: `git tag -f 0.2.1; git push -f origin 0.2.1` <br>Note: increment the major or minor version of most recent tag listed here: https://github.com/scopear/api-demo-ruby/tags.
-  * restart the server (note: ask devops to put your ssh key on the server).
+  * Trigger a build by creating and pushing a tag to origin: `git tag -f 0.2.1; git push -f origin 0.2.1` <br>Note: you'll need to increment the major or minor version of most recent tag [listed here](https://github.com/scopear/api-demo-ruby/tags).
+  * Restart the server (note: ask devops to put your ssh key on the server).
 
   ```
     ssh admin@api-demo-ruby.scopear.com
     sudo su
     cd /opt/scope/
-    nano demo.yml  #-> update image values in demo.yml with new tag 2x (e.g. change scopear/docker-api-demo-ruby:0.2.0 -> scopear/docker-api-demo-ruby:0.2.1)
-    docker stack rm demo  #-> run this multiple times until you receive the response "Nothing found in stack: demo"
+    nano demo.yml     #--> update image values in demo.yml with new tag 2x (e.g. change scopear/docker-api-demo-ruby:0.2.0 -> scopear/docker-api-demo-ruby:0.2.1)
+    docker stack rm demo     #--> run this command multiple times until you receive the response "Nothing found in stack: demo"
     docker stack deploy --compose-file demo.yml --prune --with-registry-auth demo
   ```
 

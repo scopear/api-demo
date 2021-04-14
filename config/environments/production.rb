@@ -15,7 +15,6 @@ Rails.application.configure do
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
-  config.action_controller.default_protect_from_forgery = false
   # Set the default host and port to be the same as Action Mailer.
   config.action_mailer.default_url_options =
     config.action_controller.default_url_options = {
