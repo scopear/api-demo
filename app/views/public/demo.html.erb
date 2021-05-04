@@ -15,13 +15,14 @@
 
   function updateDeeplink() {
     let deepLinkEl = $("#deepLink");
-    let deepLinkUrl = "worklink://resource?action=fetch_catalog&asset=" + $("#asset_id").val()
+    let deepLinkUrl = "worklink://resource?action=fetch_catalog&" + $.param({ asset: $("#asset_id").val() });
 
     try {
       deepLinkUrl += "&" + $.param(JSON.parse($("#external_data").val()));
     } catch (err) {
       alert("External Data must be valid JSON.");
     }
+    deepLinkUrl = 'https://getworklink.com/deferred?' + $.param({ deep_link: deepLinkUrl });
 
     deepLinkEl.attr("href", deepLinkUrl);
     deepLinkEl.text(deepLinkUrl);
@@ -147,7 +148,7 @@
         <p><h4>Step 2</h4><strong>Create a ScenarioSession.</strong></p>
 
         <h6>Option A</h6>
-        <p>Click the dynamically configured deep link below to launch the Worklink app and begin a ScenarioSession.</p>
+        <p>Click the dynamically configured deferred deep link below to launch the Worklink app and begin a ScenarioSession.</p>
         <p><a id="deepLink" target="_blank" href="http://">http://</a></p>
         <p class="note"><strong>Note</strong>: This link needs to be opened on a mobile device. If you are not viewing this application on a mobile device, send yourself an email with the link (copy & paste), and then open the link on your mobile device.</p>
 
