@@ -1,5 +1,8 @@
 # About
 
+!!! DUPLICATED FROM Scope AR API-Demo-Ruby !!!
+Intended to be replace for use with JNJ
+
   This Scope AR API-Demo-Ruby is a simple Ruby-On-Rails client application that demonstrates a complete, end-to-end integration with Scope AR APIs.
 
   It:
